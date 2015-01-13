@@ -1,0 +1,5 @@
+[package]
+
+name = "diffusion"
+version = "0.0.1"
+authors = ["Wangshan Lu <wisagan@gmail.com>"]
