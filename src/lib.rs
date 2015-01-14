@@ -5,7 +5,7 @@ static FILE_HEADER: &'static str = "DFSN";
 
 pub enum TryReadError {
     Empty,
-    Disconnected,
+    Error,
 }
 
 impl Copy for TryReadError {
@@ -45,13 +45,13 @@ impl Reader for FileReader {
                     Some(body_length) => {
                         match self.file.read_exact(body_length) {
                             Ok(value) => return Ok(value),
-                            Err(..) => return Err(TryReadError::Disconnected),
+                            Err(..) => return Err(TryReadError::Error),
                         };
                     },
-                    None => return Err(TryReadError::Disconnected),
+                    None => return Err(TryReadError::Error),
                 };
             },
-            Err(..) => return Err(TryReadError::Disconnected),
+            Err(..) => return Err(TryReadError::Error),
         };
     }
 }
