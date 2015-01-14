@@ -15,6 +15,18 @@ pub trait Reader {
     fn try_read(&mut self) -> Result<Vec<u8>, TryReadError>;
 }
 
+pub enum TryWriteError {
+    Full,
+    Error,
+}
+
+impl Copy for TryWriteError {
+}
+
+pub trait Writer {
+    fn try_write(&mut self, buf: &[u8]) -> Result<(), TryWriteError>;
+}
+
 pub struct FileReader {
     file: File,
 }
@@ -53,5 +65,38 @@ impl Reader for FileReader {
             },
             Err(..) => return Err(TryReadError::Error),
         };
+    }
+}
+
+pub struct FileWriter {
+    file: File,
+}
+
+impl FileWriter {
+    pub fn new(path: &Path) -> Option<FileWriter> {
+        match File::create(path) {
+            Ok(mut file) => {
+                match file.write_str(FILE_HEADER) {
+                    Ok(..) => return Some(FileWriter{file: file}),
+                    Err(..) => return None,
+                }
+            }
+            Err(..) => return None,
+        }
+    }
+}
+
+impl Writer for FileWriter {
+    fn try_write(&mut self, buf: &[u8]) -> Result<(), TryWriteError> {
+        match buf.len().to_i32() {
+            Some(value) => match self.file.write_le_i32(value) {
+                Ok(..) => match self.file.write(buf) {
+                    Ok(..) => return Ok(()),
+                    Err(..) => return Err(TryWriteError::Error),
+                },
+                Err(..) => return Err(TryWriteError::Error),
+            },
+            None => return Err(TryWriteError::Error),
+        }
     }
 }
