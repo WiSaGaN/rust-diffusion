@@ -3,3 +3,8 @@
 name = "diffusion"
 version = "0.0.1"
 authors = ["Wangshan Lu <wisagan@gmail.com>"]
+
+[[bin]]
+
+name = "file_reader"
+path = "src/bin/file_reader.rs"

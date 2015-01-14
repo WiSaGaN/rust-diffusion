@@ -20,7 +20,7 @@ pub struct FileReader {
 }
 
 impl FileReader {
-    fn new(path: &Path) -> Option<FileReader> {
+    pub fn new(path: &Path) -> Option<FileReader> {
         match File::open(path) {
             Ok(mut file) => {
                 match file.read_exact(FILE_HEADER.len()) {
@@ -54,8 +54,4 @@ impl Reader for FileReader {
             Err(..) => return Err(TryReadError::Disconnected),
         };
     }
-}
-
-#[test]
-fn it_works() {
 }
