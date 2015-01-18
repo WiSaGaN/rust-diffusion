@@ -13,3 +13,8 @@ path = "src/bin/file_reader.rs"
 
 name = "file_writer"
 path = "src/bin/file_writer.rs"
+
+[[bin]]
+
+name = "multicast_writer"
+path = "src/bin/multicast_writer.rs"

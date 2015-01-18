@@ -1,5 +1,7 @@
 use std::io::File;
 use std::num::ToPrimitive;
+use std::io::net::ip;
+use std::io::net::udp::UdpSocket;
 
 static FILE_HEADER: &'static str = "DFSN";
 
@@ -97,6 +99,34 @@ impl Writer for FileWriter {
                 Err(..) => return Err(TryWriteError::Error),
             },
             None => return Err(TryWriteError::Error),
+        }
+    }
+}
+
+pub struct MulticastWriter {
+    socket: UdpSocket,
+    multicast_addr: ip::SocketAddr,
+}
+
+impl MulticastWriter {
+    pub fn new<A: ip::ToSocketAddr>(addr: A) -> Option<MulticastWriter> {
+        match addr.to_socket_addr() {
+            Ok(value) => {
+                match UdpSocket::bind(value) {
+                    Ok(socket) => Some(MulticastWriter{ socket: socket, multicast_addr: value }),
+                    Err(..) => None,
+                }
+            }
+            Err(..) => None,
+        }
+    }
+}
+
+impl Writer for MulticastWriter {
+    fn try_write(&mut self, buf: &[u8]) -> Result<(), TryWriteError> {
+        match self.socket.send_to(buf, self.multicast_addr) {
+            Ok(..) => Ok(()),
+            Err(..) => Err(TryWriteError::Error),
         }
     }
 }
