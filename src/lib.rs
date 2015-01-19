@@ -130,3 +130,41 @@ impl Writer for MulticastWriter {
         }
     }
 }
+
+pub struct MulticastReader {
+    socket: UdpSocket,
+    buf: Vec<u8>,
+}
+
+impl MulticastReader {
+    pub fn new<A: ip::ToSocketAddr>(addr: A) -> Option<MulticastReader> {
+        match addr.to_socket_addr() {
+            Ok(value) => {
+                match UdpSocket::bind(value) {
+                    Ok(mut socket) => {
+                        socket.join_multicast(value.ip);
+                        let buf_size = 1536us;
+                        let mut buf = std::vec::Vec::with_capacity(buf_size);
+                        buf.resize(buf_size, 0u8);
+                        Some(MulticastReader{ socket: socket, buf: buf.clone() })
+                    },
+                    Err(..) => None,
+                }
+            }
+            Err(..) => None,
+        }
+    }
+}
+
+impl Reader for MulticastReader {
+    fn try_read(&mut self) -> Result<Vec<u8>, TryReadError> {
+        match self.socket.recv_from(self.buf.as_mut_slice()) {
+            Ok((length,_)) => {
+                let mut data = self.buf.clone();
+                data.resize(length, 0u8);
+                Ok(data)
+            }
+            Err(value) => Err(TryReadError::Error)
+        }
+    }
+}
