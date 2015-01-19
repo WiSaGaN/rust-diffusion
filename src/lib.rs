@@ -164,7 +164,7 @@ impl Reader for MulticastReader {
                 data.resize(length, 0u8);
                 Ok(data)
             }
-            Err(value) => Err(TryReadError::Error)
+            Err(..) => Err(TryReadError::Error)
         }
     }
 }
