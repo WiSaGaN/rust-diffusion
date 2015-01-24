@@ -18,3 +18,8 @@ path = "src/bin/file_writer.rs"
 
 name = "multicast_writer"
 path = "src/bin/multicast_writer.rs"
+
+[[bin]]
+
+name = "multicast_reader"
+path = "src/bin/multicast_reader.rs"
