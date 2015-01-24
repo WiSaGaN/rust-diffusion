@@ -1,0 +1,25 @@
+[package]
+
+name = "diffusion"
+version = "0.0.1"
+authors = ["Wangshan Lu <wisagan@gmail.com>"]
+
+[[bin]]
+
+name = "file_reader"
+path = "src/bin/file_reader.rs"
+
+[[bin]]
+
+name = "file_writer"
+path = "src/bin/file_writer.rs"
+
+[[bin]]
+
+name = "multicast_writer"
+path = "src/bin/multicast_writer.rs"
+
+[[bin]]
+
+name = "multicast_reader"
+path = "src/bin/multicast_reader.rs"
