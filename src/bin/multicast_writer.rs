@@ -17,6 +17,6 @@ fn main() {
         let message = "This is message No. ".to_string() + time.to_string().as_slice();
         writer.try_write(message.as_bytes());
         println!("{}", message);
-        std::io::timer::sleep(std::time::Duration::seconds(step));
+        std::old_io::timer::sleep(std::time::Duration::seconds(step));
     }
 }
