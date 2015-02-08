@@ -7,7 +7,7 @@ fn main() {
         println!("Usage: {} text_filename dfsn_filename", args[0]);
         return;
     }
-    let mut text_file = std::io::BufferedReader::new(std::io::File::open(&Path::new(args[1].as_slice())));
+    let mut text_file = std::old_io::BufferedReader::new(std::old_io::File::open(&Path::new(args[1].as_slice())));
 
     let mut writer = FileWriter::new(&Path::new(args[2].as_slice())).unwrap();
     for line in text_file.lines() {
