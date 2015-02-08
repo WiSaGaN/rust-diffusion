@@ -1,7 +1,7 @@
-use std::io::File;
+use std::old_io::File;
 use std::num::ToPrimitive;
-use std::io::net::ip;
-use std::io::net::udp::UdpSocket;
+use std::old_io::net::ip;
+use std::old_io::net::udp::UdpSocket;
 
 static FILE_HEADER: &'static str = "DFSN";
 
