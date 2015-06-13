@@ -10,11 +10,13 @@ fn main() {
         return;
     }
     println!("Test started.");
-    let mut reader = FileReader::new(&Path::new(args[1].as_str())).unwrap();
+    let file = std::fs::File::open(&Path::new(args[1].as_str())).unwrap();
+    let mut reader = FileReader::new(file).unwrap();
     loop {
-        match reader.try_read() {
-            Ok(value) => println!("{}", String::from_utf8(value).unwrap()),
-            Err(..) => break,
+        let value = reader.read().unwrap();
+        match value {
+            Some(data) => println!("{}", String::from_utf8(data).unwrap()),
+            None => break,
         }
     }
     println!("Test finished.");

@@ -15,7 +15,7 @@ fn main() {
     let step = 1i64;
     for time in 0i64..step {
         let message = "This is message No. ".to_string() + time.to_string().as_str();
-        writer.try_write(message.as_bytes()).unwrap();
+        writer.write(message.as_bytes()).unwrap();
         println!("{}", message);
         std::thread::sleep_ms((step * 1000) as u32);
     }

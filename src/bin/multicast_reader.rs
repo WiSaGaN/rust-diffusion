@@ -12,9 +12,10 @@ fn main() {
     println!("Connecting to {}:{}", args[1], port);
     let mut reader = MulticastReader::new((args[1].as_str(), port)).unwrap();
     loop {
-        match reader.try_read() {
-            Ok(value) => println!("{}", String::from_utf8(value).unwrap()),
-            Err(..) => break,
+        let value = reader.read().unwrap();
+        match value {
+            Some(data) => println!("{}", String::from_utf8(data).unwrap()),
+            None => break,
         }
     }
 }

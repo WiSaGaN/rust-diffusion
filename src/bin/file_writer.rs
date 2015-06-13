@@ -13,8 +13,9 @@ fn main() {
     }
     let text_file = std::io::BufReader::new(File::open(&Path::new(args[1].as_str())).unwrap());
 
-    let mut writer = FileWriter::new(&Path::new(args[2].as_str())).unwrap();
+    let source_file = File::open(&Path::new(args[2].as_str())).unwrap();
+    let mut writer = FileWriter::new(source_file).unwrap();
     for line in text_file.lines() {
-        writer.try_write(line.unwrap().trim().as_bytes()).unwrap();
+        writer.write(line.unwrap().trim().as_bytes()).unwrap();
     }
 }
