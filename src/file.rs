@@ -66,5 +66,3 @@ impl<T> Writer for FileWriter<T> where T: Write {
         Ok(())
     }
 }
-
-

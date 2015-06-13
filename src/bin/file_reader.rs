@@ -8,7 +8,6 @@ fn main() {
         println!("Usage: {} dfsn_filename", args[0]);
         return;
     }
-    println!("Test started.");
     let file = std::fs::File::open(&Path::new(&args[1])).unwrap();
     let mut reader = FileReader::new(file).unwrap();
     loop {
@@ -18,5 +17,4 @@ fn main() {
             None => break,
         }
     }
-    println!("Test finished.");
 }
