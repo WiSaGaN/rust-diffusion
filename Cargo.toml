@@ -1,7 +1,7 @@
 [package]
 
 name = "diffusion"
-version = "0.6.2"
+version = "0.7.0"
 authors = ["Wangshan Lu <wisagan@gmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -21,13 +21,3 @@ path = "src/bin/file_reader.rs"
 
 name = "file_writer"
 path = "src/bin/file_writer.rs"
-
-[[bin]]
-
-name = "multicast_writer"
-path = "src/bin/multicast_writer.rs"
-
-[[bin]]
-
-name = "multicast_reader"
-path = "src/bin/multicast_reader.rs"

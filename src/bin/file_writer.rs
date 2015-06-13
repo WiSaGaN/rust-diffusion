@@ -1,4 +1,3 @@
-#![feature(convert)]
 extern crate diffusion;
 use std::fs::File;
 use std::path::Path;
@@ -11,10 +10,19 @@ fn main() {
         println!("Usage: {} text_filename dfsn_filename", args[0]);
         return;
     }
-    let text_file = std::io::BufReader::new(File::open(&Path::new(args[1].as_str())).unwrap());
-
-    let mut writer = FileWriter::new(&Path::new(args[2].as_str())).unwrap();
-    for line in text_file.lines() {
-        writer.try_write(line.unwrap().trim().as_bytes()).unwrap();
+    match File::open(&Path::new(&args[1])) {
+        Ok(source_text) => {
+            let source = std::io::BufReader::new(source_text);
+            match File::create(&Path::new(&args[2])) {
+                Ok(target) => {
+                    let mut writer = FileWriter::new(target).unwrap();
+                    for line in source.lines() {
+                        writer.write(line.unwrap().trim().as_bytes()).unwrap();
+                    }
+                },
+                Err(err) => println!("Error when creating target file: {:?}", err),
+            }
+        },
+        Err(err) => println!("Error when opening source text file: {:?}", err),
     }
 }
