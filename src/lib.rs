@@ -1,9 +1,4 @@
-#![feature(udp)]
-#![feature(ip_addr)]
-#![feature(collections)]
-
 mod file;
-mod multicast;
 
 use std::convert::From;
 use std::{error, fmt};
@@ -57,4 +52,3 @@ pub trait Writer {
 }
 
 pub use file::{FileWriter, FileReader};
-pub use multicast::{MulticastWriter, MulticastReader};

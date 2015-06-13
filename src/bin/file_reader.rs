@@ -1,4 +1,3 @@
-#![feature(convert)]
 extern crate diffusion;
 use std::path::Path;
 use diffusion::Reader;
@@ -10,7 +9,7 @@ fn main() {
         return;
     }
     println!("Test started.");
-    let file = std::fs::File::open(&Path::new(args[1].as_str())).unwrap();
+    let file = std::fs::File::open(&Path::new(&args[1])).unwrap();
     let mut reader = FileReader::new(file).unwrap();
     loop {
         let value = reader.read().unwrap();
