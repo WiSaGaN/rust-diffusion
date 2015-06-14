@@ -1,5 +1,5 @@
 extern crate diffusion;
-use std::path::Path;
+use std::ascii::AsciiExt;
 use diffusion::Reader;
 use diffusion::FileReader;
 fn main() {
@@ -8,12 +8,22 @@ fn main() {
         println!("Usage: {} dfsn_filename", args[0]);
         return;
     }
-    let file = std::fs::File::open(&Path::new(&args[1])).unwrap();
-    let mut reader = FileReader::new(file).unwrap();
+    let input : Option<Box<std::io::Read>> = if args[1] == "-".to_string() {
+        Some(Box::new(std::io::stdin()))
+    } else {
+        Some(Box::new(std::fs::File::open(&std::path::Path::new(&args[1])).unwrap()))
+    };
+    let mut reader = FileReader::new(input.unwrap()).unwrap();
     loop {
         let value = reader.read().unwrap();
         match value {
-            Some(data) => println!("{}", String::from_utf8(data).unwrap()),
+            Some(data) => {
+                if data.is_ascii() {
+                    println!("{}", String::from_utf8(data).unwrap());
+                } else {
+                    println!("Binary data with length = {}", data.len());
+                }
+            }
             None => break,
         }
     }

@@ -29,13 +29,20 @@ impl<T> Reader for FileReader<T> where T: Read {
             let header_ptr : *const i32 = unsafe { std::mem::transmute(&header[0]) };
             let body_length_number = unsafe { std::ptr::read::<i32>(header_ptr) };
             let body_length = body_length_number as usize;
-            let mut buffer = vec![0u8; body_length];
-            let read_length = try!(self.file.read(&mut buffer));
-            if read_length == body_length {
-                return Ok(Some(buffer));
-            } else {
-                return Err(Error::InsufficientLength(body_length - read_length));
+            let mut remaining_length = body_length;
+            let mut full_buffer = Vec::with_capacity(body_length);
+            while remaining_length > 0 {
+                let mut buffer = vec![0u8; remaining_length];
+                let read_length = try!(self.file.read(&mut buffer));
+                if read_length == 0 {
+                    return Err(Error::InsufficientLength(remaining_length));
+                } else {
+                    remaining_length -= read_length;
+                }
+                buffer.truncate(read_length);
+                full_buffer.extend(buffer);
             }
+            return Ok(Some(full_buffer));
         } else if header_read_length == 0 {
             return Ok(None);
         } else {
