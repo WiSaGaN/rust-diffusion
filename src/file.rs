@@ -36,7 +36,10 @@ impl<T> Reader for FileReader<T> where T: Read {
                 let mut buffer : Vec<u8> = Vec::with_capacity(remaining_length);
                 unsafe { buffer.set_len(remaining_length); }
                 let read_length = try!(self.file.read(&mut buffer));
-                if read_length == 0 {
+                if read_length == body_length {
+                    // Optimize for getting data with only one read.
+                    return Ok(Some(buffer));
+                } else if read_length == 0 {
                     return Err(Error::InsufficientLength(remaining_length));
                 } else {
                     remaining_length -= read_length;
