@@ -23,8 +23,8 @@ impl<T> FileReader<T> where T: Read {
 
 impl<T> Reader for FileReader<T> where T: Read {
     fn read(&mut self) -> Result<Option<Vec<u8>>> {
-        let mut header : Vec<u8> = Vec::with_capacity(std::mem::size_of::<i32>());
-        unsafe { header.set_len(std::mem::size_of::<i32>()); }
+        // Rust currently does not support constexpr.
+        let mut header = [0u8; 4];
         let header_read_length = try!(self.file.read(&mut header));
         if header_read_length == std::mem::size_of::<i32>() {
             let header_ptr : *const i32 = unsafe { std::mem::transmute(&header[0]) };
