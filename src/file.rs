@@ -23,7 +23,8 @@ impl<T> FileReader<T> where T: Read {
 
 impl<T> Reader for FileReader<T> where T: Read {
     fn read(&mut self) -> Result<Option<Vec<u8>>> {
-        let mut header = vec![0u8; std::mem::size_of::<i32>()];
+        let mut header : Vec<u8> = Vec::with_capacity(std::mem::size_of::<i32>());
+        unsafe { header.set_len(std::mem::size_of::<i32>()); }
         let header_read_length = try!(self.file.read(&mut header));
         if header_read_length == std::mem::size_of::<i32>() {
             let header_ptr : *const i32 = unsafe { std::mem::transmute(&header[0]) };
@@ -32,7 +33,8 @@ impl<T> Reader for FileReader<T> where T: Read {
             let mut remaining_length = body_length;
             let mut full_buffer = Vec::with_capacity(body_length);
             while remaining_length > 0 {
-                let mut buffer = vec![0u8; remaining_length];
+                let mut buffer : Vec<u8> = Vec::with_capacity(remaining_length);
+                unsafe { buffer.set_len(remaining_length); }
                 let read_length = try!(self.file.read(&mut buffer));
                 if read_length == 0 {
                     return Err(Error::InsufficientLength(remaining_length));
