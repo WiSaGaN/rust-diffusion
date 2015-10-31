@@ -2,14 +2,14 @@ extern crate diffusion;
 use diffusion::Writer;
 use diffusion::MulticastWriter;
 fn main() {
-    let args : Vec<String> = std::env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
         println!("Multicast message once every second.");
         println!("Usage: {} multicast_ip multicast_port", args[0]);
         return;
     }
-    let port : u16 = std::str::FromStr::from_str(&args[2]).unwrap();
-    let ipv4 : std::net::Ipv4Addr = std::str::FromStr::from_str(&args[1]).unwrap();
+    let port: u16 = std::str::FromStr::from_str(&args[2]).unwrap();
+    let ipv4: std::net::Ipv4Addr = std::str::FromStr::from_str(&args[1]).unwrap();
     println!("Connecting to {}:{}", args[1], port);
     let mut writer = MulticastWriter::new(std::net::SocketAddrV4::new(ipv4, port)).unwrap();
     let step = 1i64;

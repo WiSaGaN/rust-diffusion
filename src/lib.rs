@@ -52,5 +52,5 @@ pub trait Writer {
     fn write(&mut self, buf: &[u8]) -> Result<()>;
 }
 
-pub use file::{FileWriter, FileReader};
-pub use multicast::{MulticastWriter, MulticastReader};
+pub use file::{FileReader, FileWriter};
+pub use multicast::{MulticastReader, MulticastWriter};

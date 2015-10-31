@@ -5,7 +5,7 @@ use self::net2::UdpSocketExt;
 use std;
 use std::net::{SocketAddrV4, UdpSocket};
 
-use super::{Result, Reader, Writer};
+use super::{Reader, Result, Writer};
 
 pub struct MulticastWriter {
     socket: UdpSocket,
@@ -15,7 +15,10 @@ pub struct MulticastWriter {
 impl MulticastWriter {
     pub fn new(addr: SocketAddrV4) -> Result<MulticastWriter> {
         let socket = try!(UdpSocket::bind(&addr));
-        Ok(MulticastWriter{ socket: socket, multicast_addr: addr })
+        Ok(MulticastWriter {
+            socket: socket,
+            multicast_addr: addr,
+        })
     }
 }
 
@@ -35,7 +38,10 @@ impl MulticastReader {
     pub fn new(addr: SocketAddrV4) -> Result<MulticastReader> {
         let socket = try!(UdpSocket::bind(&addr));
         try!(socket.join_multicast_v4(&addr.ip(), &std::net::Ipv4Addr::new(0u8, 0u8, 0u8, 0u8)));
-        Ok(MulticastReader{ socket: socket, buf: vec![0u8; 1536usize] })
+        Ok(MulticastReader {
+            socket: socket,
+            buf: vec![0u8; 1536usize],
+        })
     }
 }
 
