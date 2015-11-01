@@ -48,7 +48,7 @@ impl error::Error for Error {
 
     fn cause(&self) -> Option<&error::Error> {
         match *self {
-            Error::IoError(ref cause) => Some(cause.as_ref()),
+            Error::IoError(ref cause) => Some(&**cause),
             _ => None,
         }
     }
