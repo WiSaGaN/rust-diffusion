@@ -3,12 +3,12 @@ use std::ascii::AsciiExt;
 use diffusion::Reader;
 use diffusion::FileReader;
 fn main() {
-    let args : Vec<String> = std::env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
         println!("Usage: {} dfsn_filename", args[0]);
         return;
     }
-    let input : Option<Box<std::io::Read>> = if args[1] == "-".to_string() {
+    let input: Option<Box<std::io::Read>> = if args[1] == "-".to_string() {
         Some(Box::new(std::io::stdin()))
     } else {
         Some(Box::new(std::fs::File::open(&std::path::Path::new(&args[1])).unwrap()))
