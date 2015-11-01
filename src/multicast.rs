@@ -7,12 +7,17 @@ use std::net::{SocketAddrV4, UdpSocket};
 
 use super::{Reader, Result, Writer};
 
+/// is writer for multicast.
+/// `MulticastWriter` uses the natual UDP packet as message boundary.
+#[derive(Debug)]
 pub struct MulticastWriter {
     socket: UdpSocket,
     multicast_addr: SocketAddrV4,
 }
 
 impl MulticastWriter {
+    /// returns a new instance of `MulticastWriter`.
+    /// `addr` is the address the sending socket binds to, and also the address that it sends to.
     pub fn new(addr: SocketAddrV4) -> Result<MulticastWriter> {
         let socket = try!(UdpSocket::bind(&addr));
         Ok(MulticastWriter {
@@ -29,12 +34,17 @@ impl Writer for MulticastWriter {
     }
 }
 
+/// is reader for multicast.
+/// Reads the UDP packet multicasted from writer. Each packet is a message.
+#[derive(Debug)]
 pub struct MulticastReader {
     socket: UdpSocket,
     buf: Vec<u8>,
 }
 
 impl MulticastReader {
+    /// returns a new instance of `MulticastReader`.
+    /// Binds to `addr`.
     pub fn new(addr: SocketAddrV4) -> Result<MulticastReader> {
         let socket = try!(UdpSocket::bind(&addr));
         try!(socket.join_multicast_v4(&addr.ip(), &std::net::Ipv4Addr::new(0u8, 0u8, 0u8, 0u8)));
