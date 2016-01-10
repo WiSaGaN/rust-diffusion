@@ -5,6 +5,7 @@ version = "0.7.4"
 authors = ["Wangshan Lu <wisagan@gmail.com>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
+documentation = "http://wisagan.github.io/rust-diffusion/diffusion/"
 repository = "https://github.com/WiSaGaN/rust-diffusion"
 homepage = "https://github.com/WiSaGaN/rust-diffusion"
 description = """
