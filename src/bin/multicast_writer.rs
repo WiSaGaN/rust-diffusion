@@ -1,6 +1,8 @@
 extern crate diffusion;
 use diffusion::Writer;
 use diffusion::MulticastWriter;
+use std::thread::sleep;
+use std::time::Duration;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
@@ -17,6 +19,6 @@ fn main() {
         let message = "This is message No. ".to_string() + &time.to_string();
         writer.write(message.as_bytes()).unwrap();
         println!("{}", message);
-        std::thread::sleep_ms((step * 1000) as u32);
+        sleep(Duration::from_secs(1u64));
     }
 }
