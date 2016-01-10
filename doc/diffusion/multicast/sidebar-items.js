@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MulticastReader","is reader for multicast. Reads the UDP packet multicasted from writer. Each packet is a message."],["MulticastWriter","is writer for multicast. `MulticastWriter` uses the natual UDP packet as message boundary."]]});
