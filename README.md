@@ -4,3 +4,5 @@
 [![crates.io](http://meritbadge.herokuapp.com/diffusion)](https://crates.io/crates/diffusion)
 
 This is the rust implementation of diffusion library. Diffusion is an effcient message-based data distribution library.
+
+## [API documentation](http://wisagan.github.io/rust-diffusion/diffusion/)
