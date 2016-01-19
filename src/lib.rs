@@ -8,7 +8,6 @@
 //! Diffusion is a static library that provides several transport with a unified interface for
 //! messages based sub-pub style communication.
 
-
 mod file;
 mod multicast;
 
@@ -76,3 +75,29 @@ pub trait Writer {
 
 pub use file::{FileReader, FileWriter};
 pub use multicast::{MulticastReader, MulticastWriter};
+
+#[cfg(test)]
+mod tests {
+    use ::std;
+    use super::*;
+
+    #[test]
+    fn reader_new_err() {
+        let empty = std::io::empty();
+        assert_eq!(Error::CorruptSegmentHeader, FileReader::new(empty).err().unwrap());
+    }
+
+    #[test]
+    fn writer_err() {
+        let mut buffer = [0u8;3];
+        // TODO: Insuffcient right for header.
+    }
+
+    #[test]
+    fn writer_write() {
+        let message: &[u8] = b"hello";
+        let mut writer: Vec<u8> = vec![];
+        assert!(FileWriter::new(&mut writer).unwrap().write(message).is_ok());
+        assert_eq!(b"DFSN\x05\0\0\0hello".as_ref(), &writer[..]);
+    }
+}

@@ -1,4 +1,5 @@
-use std;
+use ::std;
+
 use std::io::{Read, Write};
 
 use super::{Error, Reader, Result, Writer};
@@ -90,6 +91,7 @@ impl<T> Writer for FileWriter<T> where T: Write {
         let header_ptr: *const u8 = unsafe { std::mem::transmute(&value) };
         let header_length = std::mem::size_of::<i32>();
         let slice = unsafe { std::slice::from_raw_parts(header_ptr, header_length) };
+        // TODO: Check insufficient write. Or even need to add new error types.
         try!(self.file.write(slice));
         try!(self.file.write(buf));
         Ok(())
