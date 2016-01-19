@@ -8,7 +8,6 @@
 //! Diffusion is a static library that provides several transport with a unified interface for
 //! messages based sub-pub style communication.
 
-
 mod file;
 mod multicast;
 
@@ -16,7 +15,7 @@ use std::convert::From;
 use std::{error, fmt};
 
 /// represents errors that can be encountered during the usage of of reader and writer.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
     /// indicates corruption when initializing the reader. This can only happens in a file.
     CorruptSegmentHeader,
@@ -27,7 +26,7 @@ pub enum Error {
     InsufficientLength(usize),
     /// indicates there is an IO error happening during reading or writing. This can happen in all
     /// transport types.
-    IoError(Box<error::Error>),
+    IoError(std::io::ErrorKind),
 }
 
 impl fmt::Display for Error {
@@ -47,16 +46,13 @@ impl error::Error for Error {
     }
 
     fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            Error::IoError(ref cause) => Some(&**cause),
-            _ => None,
-        }
+        None
     }
 }
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Error {
-        Error::IoError(Box::new(err))
+        Error::IoError(err.kind())
     }
 }
 
@@ -79,3 +75,29 @@ pub trait Writer {
 
 pub use file::{FileReader, FileWriter};
 pub use multicast::{MulticastReader, MulticastWriter};
+
+#[cfg(test)]
+mod tests {
+    use ::std;
+    use super::*;
+
+    #[test]
+    fn reader_new_err() {
+        let empty = std::io::empty();
+        assert_eq!(Error::CorruptSegmentHeader, FileReader::new(empty).err().unwrap());
+    }
+
+    #[test]
+    fn writer_err() {
+        let mut buffer = [0u8;3];
+        // TODO: Insuffcient right for header.
+    }
+
+    #[test]
+    fn writer_write() {
+        let message: &[u8] = b"hello";
+        let mut writer: Vec<u8> = vec![];
+        assert!(FileWriter::new(&mut writer).unwrap().write(message).is_ok());
+        assert_eq!(b"DFSN\x05\0\0\0hello".as_ref(), &writer[..]);
+    }
+}
