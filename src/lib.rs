@@ -16,7 +16,7 @@ use std::convert::From;
 use std::{error, fmt};
 
 /// represents errors that can be encountered during the usage of of reader and writer.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
     /// indicates corruption when initializing the reader. This can only happens in a file.
     CorruptSegmentHeader,
@@ -27,7 +27,7 @@ pub enum Error {
     InsufficientLength(usize),
     /// indicates there is an IO error happening during reading or writing. This can happen in all
     /// transport types.
-    IoError(Box<error::Error>),
+    IoError(std::io::ErrorKind),
 }
 
 impl fmt::Display for Error {
@@ -47,16 +47,13 @@ impl error::Error for Error {
     }
 
     fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            Error::IoError(ref cause) => Some(&**cause),
-            _ => None,
-        }
+        None
     }
 }
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Error {
-        Error::IoError(Box::new(err))
+        Error::IoError(err.kind())
     }
 }
 
