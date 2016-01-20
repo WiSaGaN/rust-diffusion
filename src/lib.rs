@@ -82,19 +82,39 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reader_new_err() {
+    fn reader_return_err_on_corrupted_header() {
         let empty = std::io::empty();
         assert_eq!(Error::CorruptSegmentHeader, FileReader::new(empty).err().unwrap());
+        let wrong_header = &b"DFSM"[..];
+        assert_eq!(Error::CorruptSegmentHeader, FileReader::new(wrong_header).err().unwrap());
     }
 
     #[test]
-    fn writer_err() {
+    fn reader_read_one_message() {
+        let data = &b"DFSN\x05\0\0\0hello"[..];
+        assert_eq!(b"hello"[..], FileReader::new(data).unwrap().read().unwrap().unwrap()[..]);
+    }
+
+    #[test]
+    fn reader_return_err_on_truncated_data() {
+        let truncated_data = &b"DFSN\x05\0\0\0hell"[..];
+        assert_eq!(Err(Error::InsufficientLength(1)), FileReader::new(truncated_data).unwrap().read());
+    }
+
+    #[test]
+    fn reader_return_err_on_corrupted_message_header() {
+        let data_with_corrupted_header = &b"DFSN\x05\0\0"[..];
+        assert_eq!(Err(Error::CorruptMsgHeader), FileReader::new(data_with_corrupted_header).unwrap().read());
+    }
+
+    #[test]
+    fn writer_return_err_when_writing_header_with_short_length() {
         let mut buffer = [0u8;3];
-        // TODO: Insuffcient right for header.
+        assert_eq!(Error::CorruptSegmentHeader, FileWriter::new(&mut buffer[..]).err().unwrap());
     }
 
     #[test]
-    fn writer_write() {
+    fn writer_write_one_message() {
         let message: &[u8] = b"hello";
         let mut writer: Vec<u8> = vec![];
         assert!(FileWriter::new(&mut writer).unwrap().write(message).is_ok());

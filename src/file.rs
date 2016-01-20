@@ -80,8 +80,11 @@ impl<T> FileWriter<T> where T: Write {
     /// returns a new file writer instance.
     /// It returns error if there is IO error during the process.
     pub fn new(mut file: T) -> Result<FileWriter<T>> {
-        try!(file.write(FILE_HEADER));
-        Ok(FileWriter { file: file })
+        if try!(file.write(FILE_HEADER)) == FILE_HEADER.len() {
+            Ok(FileWriter { file: file })
+        } else {
+            Err(Error::CorruptSegmentHeader)
+        }
     }
 }
 
@@ -91,7 +94,8 @@ impl<T> Writer for FileWriter<T> where T: Write {
         let header_ptr: *const u8 = unsafe { std::mem::transmute(&value) };
         let header_length = std::mem::size_of::<i32>();
         let slice = unsafe { std::slice::from_raw_parts(header_ptr, header_length) };
-        // TODO: Check insufficient write. Or even need to add new error types.
+        // TODO: Check insufficient write. Or even need to add new error types. Restore upon
+        // failuer? And add tests.
         try!(self.file.write(slice));
         try!(self.file.write(buf));
         Ok(())
