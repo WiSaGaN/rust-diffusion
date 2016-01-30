@@ -8,6 +8,8 @@
 //! Diffusion is a static library that provides several transport with a unified interface for
 //! messages based sub-pub style communication.
 
+extern crate net2;
+
 mod file;
 mod multicast;
 

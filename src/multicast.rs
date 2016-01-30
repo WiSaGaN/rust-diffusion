@@ -1,11 +1,7 @@
-extern crate net2;
+use ::{Reader, Result, Writer};
 
-use self::net2::UdpSocketExt;
-
-use std;
-use std::net::{SocketAddrV4, UdpSocket};
-
-use super::{Reader, Result, Writer};
+use net2::UdpSocketExt;
+use std::net::{Ipv4Addr, SocketAddrV4, UdpSocket};
 
 /// is writer for multicast.
 /// `MulticastWriter` uses the natual UDP packet as message boundary.
@@ -47,7 +43,7 @@ impl MulticastReader {
     /// Binds to `addr`.
     pub fn new(addr: SocketAddrV4) -> Result<MulticastReader> {
         let socket = try!(UdpSocket::bind(&addr));
-        try!(socket.join_multicast_v4(&addr.ip(), &std::net::Ipv4Addr::new(0u8, 0u8, 0u8, 0u8)));
+        try!(socket.join_multicast_v4(&addr.ip(), &Ipv4Addr::new(0u8, 0u8, 0u8, 0u8)));
         Ok(MulticastReader {
             socket: socket,
             buf: vec![0u8; 1536usize],
