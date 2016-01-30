@@ -8,6 +8,7 @@
 //! Diffusion is a static library that provides several transport with a unified interface for
 //! messages based sub-pub style communication.
 
+extern crate net2;
 
 mod file;
 mod multicast;
@@ -16,7 +17,7 @@ use std::convert::From;
 use std::{error, fmt};
 
 /// represents errors that can be encountered during the usage of of reader and writer.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
     /// indicates corruption when initializing the reader. This can only happens in a file.
     CorruptSegmentHeader,
@@ -27,7 +28,7 @@ pub enum Error {
     InsufficientLength(usize),
     /// indicates there is an IO error happening during reading or writing. This can happen in all
     /// transport types.
-    IoError(Box<error::Error>),
+    IoError(std::io::ErrorKind),
 }
 
 impl fmt::Display for Error {
@@ -47,16 +48,13 @@ impl error::Error for Error {
     }
 
     fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            Error::IoError(ref cause) => Some(&**cause),
-            _ => None,
-        }
+        None
     }
 }
 
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Error {
-        Error::IoError(Box::new(err))
+        Error::IoError(err.kind())
     }
 }
 
@@ -79,3 +77,49 @@ pub trait Writer {
 
 pub use file::{FileReader, FileWriter};
 pub use multicast::{MulticastReader, MulticastWriter};
+
+#[cfg(test)]
+mod tests {
+    use ::std;
+    use super::*;
+
+    #[test]
+    fn reader_return_err_on_corrupted_header() {
+        let empty = std::io::empty();
+        assert_eq!(Error::CorruptSegmentHeader, FileReader::new(empty).err().unwrap());
+        let wrong_header = &b"DFSM"[..];
+        assert_eq!(Error::CorruptSegmentHeader, FileReader::new(wrong_header).err().unwrap());
+    }
+
+    #[test]
+    fn reader_read_one_message() {
+        let data = &b"DFSN\x05\0\0\0hello"[..];
+        assert_eq!(b"hello"[..], FileReader::new(data).unwrap().read().unwrap().unwrap()[..]);
+    }
+
+    #[test]
+    fn reader_return_err_on_truncated_data() {
+        let truncated_data = &b"DFSN\x05\0\0\0hell"[..];
+        assert_eq!(Err(Error::InsufficientLength(1)), FileReader::new(truncated_data).unwrap().read());
+    }
+
+    #[test]
+    fn reader_return_err_on_corrupted_message_header() {
+        let data_with_corrupted_header = &b"DFSN\x05\0\0"[..];
+        assert_eq!(Err(Error::CorruptMsgHeader), FileReader::new(data_with_corrupted_header).unwrap().read());
+    }
+
+    #[test]
+    fn writer_return_err_when_writing_header_with_short_length() {
+        let mut buffer = [0u8;3];
+        assert_eq!(Error::CorruptSegmentHeader, FileWriter::new(&mut buffer[..]).err().unwrap());
+    }
+
+    #[test]
+    fn writer_write_one_message() {
+        let message: &[u8] = b"hello";
+        let mut writer: Vec<u8> = vec![];
+        assert!(FileWriter::new(&mut writer).unwrap().write(message).is_ok());
+        assert_eq!(b"DFSN\x05\0\0\0hello".as_ref(), &writer[..]);
+    }
+}

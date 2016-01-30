@@ -1,7 +1,7 @@
-use std;
-use std::io::{Read, Write};
+use ::{Error, Reader, Result, Writer};
 
-use super::{Error, Reader, Result, Writer};
+use std::io::{Read, Write};
+use std::mem::{size_of, transmute};
 
 const FILE_HEADER: &'static [u8] = b"DFSN";
 
@@ -34,9 +34,9 @@ impl<T> Reader for FileReader<T> where T: Read {
         // Rust currently does not support constexpr.
         let mut header = [0u8; 4];
         let header_read_length = try!(self.file.read(&mut header));
-        if header_read_length == std::mem::size_of::<i32>() {
-            let header_ptr: *const i32 = unsafe { std::mem::transmute(&header[0]) };
-            let body_length_number = unsafe { std::ptr::read::<i32>(header_ptr) };
+        if header_read_length == size_of::<i32>() {
+            let header_ptr: *const i32 = unsafe { transmute(&header[0]) };
+            let body_length_number = unsafe { ::std::ptr::read::<i32>(header_ptr) };
             let body_length = body_length_number as usize;
             let mut remaining_length = body_length;
             let mut full_buffer = Vec::with_capacity(body_length);
@@ -66,6 +66,17 @@ impl<T> Reader for FileReader<T> where T: Read {
     }
 }
 
+impl<T> Iterator for FileReader<T> where T: Read {
+    type Item = Result<Vec<u8>>;
+    fn next(&mut self) -> Option<Result<Vec<u8>>> {
+        match self.read() {
+            Ok(Some(data)) => Some(Ok(data)),
+            Ok(None) => None,
+            Err(error) => Some(Err(error)),
+        }
+    }
+}
+
 /// is a writer for file.
 /// It can only start to write a new file but not append to an existing file.
 #[derive(Debug)]
@@ -79,17 +90,22 @@ impl<T> FileWriter<T> where T: Write {
     /// returns a new file writer instance.
     /// It returns error if there is IO error during the process.
     pub fn new(mut file: T) -> Result<FileWriter<T>> {
-        try!(file.write(FILE_HEADER));
-        Ok(FileWriter { file: file })
+        if try!(file.write(FILE_HEADER)) == FILE_HEADER.len() {
+            Ok(FileWriter { file: file })
+        } else {
+            Err(Error::CorruptSegmentHeader)
+        }
     }
 }
 
 impl<T> Writer for FileWriter<T> where T: Write {
     fn write(&mut self, buf: &[u8]) -> Result<()> {
         let value = buf.len() as i32;
-        let header_ptr: *const u8 = unsafe { std::mem::transmute(&value) };
-        let header_length = std::mem::size_of::<i32>();
-        let slice = unsafe { std::slice::from_raw_parts(header_ptr, header_length) };
+        let header_ptr: *const u8 = unsafe { transmute(&value) };
+        let header_length = size_of::<i32>();
+        let slice = unsafe { ::std::slice::from_raw_parts(header_ptr, header_length) };
+        // TODO: Check insufficient write. Or even need to add new error types. Restore upon
+        // failuer? And add tests.
         try!(self.file.write(slice));
         try!(self.file.write(buf));
         Ok(())
