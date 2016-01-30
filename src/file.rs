@@ -66,6 +66,17 @@ impl<T> Reader for FileReader<T> where T: Read {
     }
 }
 
+impl<T> Iterator for FileReader<T> where T: Read {
+    type Item = Result<Vec<u8>>;
+    fn next(&mut self) -> Option<Result<Vec<u8>>> {
+        match self.read() {
+            Ok(Some(data)) => Some(Ok(data)),
+            Ok(None) => None,
+            Err(error) => Some(Err(error)),
+        }
+    }
+}
+
 /// is a writer for file.
 /// It can only start to write a new file but not append to an existing file.
 #[derive(Debug)]
