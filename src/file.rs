@@ -106,8 +106,8 @@ impl<T> Writer for FileWriter<T> where T: Write {
         let slice = unsafe { ::std::slice::from_raw_parts(header_ptr, header_length) };
         // TODO: Check insufficient write. Or even need to add new error types. Restore upon
         // failuer? And add tests.
-        try!(self.file.write(slice));
-        try!(self.file.write(buf));
+        try!(self.file.write_all(slice));
+        try!(self.file.write_all(buf));
         Ok(())
     }
 }
