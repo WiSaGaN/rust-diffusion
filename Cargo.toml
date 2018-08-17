@@ -28,3 +28,6 @@ path = "src/bin/multicast_reader.rs"
 [[bin]]
 name = "multicast_writer"
 path = "src/bin/multicast_writer.rs"
+
+[dev-dependencies]
+tempfile = "3.0.3"

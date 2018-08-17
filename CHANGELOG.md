@@ -2,6 +2,12 @@
 
 This project roughly adheres to [Semantic Versioning](http://semver.org/). For 0.x.y releases, `x` is the major version in semver, while `y` is the minor version.
 
+## [0.8.1] - 2018-08-17
+
+### Library
+
+* Support write multiple buffers at once in `FileWriter`
+
 ## [0.8.0] - 2016-01-31
 
 ### Breaking changes

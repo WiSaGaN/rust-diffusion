@@ -96,18 +96,23 @@ impl<T> FileWriter<T> where T: Write {
             Err(Error::CorruptSegmentHeader)
         }
     }
-}
 
-impl<T> Writer for FileWriter<T> where T: Write {
-    fn write(&mut self, buf: &[u8]) -> Result<()> {
-        let value = buf.len() as i32;
+    pub fn write_multiple(&mut self, bufs: &[&[u8]]) -> Result<()> {
+        let value = bufs.iter().fold(0, |sum, buf| sum + buf.len()) as i32;
         let header_ptr: *const u8 = unsafe { transmute(&value) };
         let header_length = size_of::<i32>();
         let slice = unsafe { ::std::slice::from_raw_parts(header_ptr, header_length) };
-        // TODO: Check insufficient write. Or even need to add new error types. Restore upon
-        // failuer? And add tests.
         try!(self.file.write_all(slice));
-        try!(self.file.write_all(buf));
+        for buf in bufs {
+            try!(self.file.write_all(buf));
+        }
         Ok(())
+    }
+}
+
+impl<T> Writer for FileWriter<T> where T: Write {
+    #[inline]
+    fn write(&mut self, buf: &[u8]) -> Result<()> {
+        self.write_multiple(&[buf])
     }
 }
