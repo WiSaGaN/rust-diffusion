@@ -97,6 +97,8 @@ impl<T> FileWriter<T> where T: Write {
         }
     }
 
+    /// writes multiple buffers as one message
+    /// returns `Ok(())` if write is successful.
     pub fn write_multiple(&mut self, bufs: &[&[u8]]) -> Result<()> {
         let value = bufs.iter().fold(0, |sum, buf| sum + buf.len()) as i32;
         let header_ptr: *const u8 = unsafe { transmute(&value) };
