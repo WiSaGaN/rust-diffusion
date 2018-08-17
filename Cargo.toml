@@ -1,5 +1,4 @@
 [package]
-
 name = "diffusion"
 version = "0.8.0"
 authors = ["Wangshan Lu <wisagan@gmail.com>"]
@@ -14,23 +13,18 @@ This is the rust implementation of diffusion library. Diffusion is an effcient m
 [dependencies]
 net2 = "0.2"
 
-
 [[bin]]
-
 name = "file_reader"
 path = "src/bin/file_reader.rs"
 
 [[bin]]
-
 name = "file_writer"
 path = "src/bin/file_writer.rs"
 
 [[bin]]
-
 name = "multicast_reader"
 path = "src/bin/multicast_reader.rs"
 
 [[bin]]
-
 name = "multicast_writer"
 path = "src/bin/multicast_writer.rs"

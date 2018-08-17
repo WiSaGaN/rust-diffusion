@@ -6,7 +6,7 @@
 
 This is the rust implementation of diffusion library. Diffusion is an effcient message-based data distribution library.
 
-## [API documentation](http://wisagan.github.io/rust-diffusion/diffusion/)
+## [API documentation](https://docs.rs/diffusion)
 
 ## Notes
 
