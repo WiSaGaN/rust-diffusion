@@ -1,5 +1,7 @@
 use ::{Error, Reader, Result, Writer};
 
+use std::io;
+use std::result;
 use std::io::{Read, Write};
 use std::mem::{size_of, transmute};
 
@@ -29,39 +31,63 @@ impl<T> FileReader<T> where T: Read {
     }
 }
 
+enum ReadExactError {
+    Partial(usize),
+    Other(io::Error),
+}
+
+fn read_exact(read: &mut Read, mut buf: &mut [u8]) -> result::Result<(), ReadExactError> {
+    let mut bytes_read = 0;
+    while !buf.is_empty() {
+        match read.read(buf) {
+            Ok(0) => break,
+            Ok(n) => { let tmp = buf; buf = &mut tmp[n..]; bytes_read += n; }
+            Err(ref e) if e.kind() == io::ErrorKind::Interrupted => {}
+            Err(e) => return Err(ReadExactError::Other(e)),
+        }
+    }
+    if !buf.is_empty() {
+        Err(ReadExactError::Partial(bytes_read))
+    } else {
+        Ok(())
+    }
+}
+
 impl<T> Reader for FileReader<T> where T: Read {
     fn read(&mut self) -> Result<Option<Vec<u8>>> {
         // Rust currently does not support constexpr.
         let mut header = [0u8; 4];
-        let header_read_length = try!(self.file.read(&mut header));
-        if header_read_length == size_of::<i32>() {
-            let header_ptr: *const i32 = unsafe { transmute(&header[0]) };
-            let body_length_number = unsafe { ::std::ptr::read::<i32>(header_ptr) };
-            let body_length = body_length_number as usize;
-            let mut remaining_length = body_length;
-            let mut full_buffer = Vec::with_capacity(body_length);
-            while remaining_length > 0 {
-                let mut buffer: Vec<u8> = Vec::with_capacity(remaining_length);
-                unsafe {
-                    buffer.set_len(remaining_length);
-                }
-                let read_length = try!(self.file.read(&mut buffer));
-                if read_length == body_length {
-                    // Optimize for getting data with only one read.
-                    return Ok(Some(buffer));
-                } else if read_length == 0 {
-                    return Err(Error::InsufficientLength(remaining_length));
-                } else {
-                    remaining_length -= read_length;
-                }
-                buffer.truncate(read_length);
-                full_buffer.extend(buffer);
+        match read_exact(&mut self.file, &mut header) {
+            Ok(()) => {
             }
-            return Ok(Some(full_buffer));
-        } else if header_read_length == 0 {
-            return Ok(None);
-        } else {
-            return Err(Error::CorruptMsgHeader);
+            Err(ReadExactError::Partial(bytes_read)) => {
+                if bytes_read == 0 {
+                    return Ok(None);
+                } else {
+                    return Err(Error::CorruptMsgHeader);
+                }
+            }
+            Err(ReadExactError::Other(io_error)) => {
+                return Err(io_error.into());
+            }
+        }
+        let header_ptr: *const i32 = unsafe { transmute(&header[0]) };
+        let body_length_number = unsafe { ::std::ptr::read::<i32>(header_ptr) };
+        let body_length = body_length_number as usize;
+        let mut full_buffer = Vec::with_capacity(body_length);
+        unsafe {
+            full_buffer.set_len(body_length);
+        }
+        match read_exact(&mut self.file, &mut full_buffer) {
+            Ok(()) => {
+                return Ok(Some(full_buffer));
+            }
+            Err(ReadExactError::Partial(bytes_read)) => {
+                return Err(Error::InsufficientLength(body_length - bytes_read));
+            }
+            Err(ReadExactError::Other(io_error)) => {
+                return Err(io_error.into());
+            }
         }
     }
 }

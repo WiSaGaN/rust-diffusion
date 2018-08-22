@@ -2,6 +2,12 @@
 
 This project roughly adheres to [Semantic Versioning](http://semver.org/). For 0.x.y releases, `x` is the major version in semver, while `y` is the minor version.
 
+## [0.8.2] - 2018-08-22
+
+### Library
+
+* Fix spurious CorruptMsgHeader in FileReader
+
 ## [0.8.1] - 2018-08-17
 
 ### Library
