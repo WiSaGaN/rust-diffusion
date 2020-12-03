@@ -1,4 +1,3 @@
-extern crate diffusion;
 use std::fs::File;
 use std::path::Path;
 use std::io::BufRead;

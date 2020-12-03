@@ -1,4 +1,4 @@
-use ::{Reader, Result, Writer};
+use crate::{Reader, Result, Writer};
 
 use std::net::{Ipv4Addr, SocketAddrV4, UdpSocket};
 

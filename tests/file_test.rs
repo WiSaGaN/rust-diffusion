@@ -1,6 +1,3 @@
-extern crate diffusion;
-extern crate tempfile;
-
 use std::io::{Seek, SeekFrom};
 
 use diffusion::{FileReader, FileWriter, Reader, Writer};

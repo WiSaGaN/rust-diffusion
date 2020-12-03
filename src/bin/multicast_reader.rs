@@ -1,4 +1,3 @@
-extern crate diffusion;
 use diffusion::Reader;
 use diffusion::MulticastReader;
 fn main() {

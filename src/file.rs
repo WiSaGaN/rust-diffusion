@@ -1,4 +1,4 @@
-use ::{Error, Reader, Result, Writer};
+use crate::{Error, Reader, Result, Writer};
 
 use std::io;
 use std::result;

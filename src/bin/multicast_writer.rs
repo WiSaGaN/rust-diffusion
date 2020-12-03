@@ -1,4 +1,3 @@
-extern crate diffusion;
 use diffusion::Writer;
 use diffusion::MulticastWriter;
 use std::thread::sleep;
