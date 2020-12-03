@@ -1,6 +1,5 @@
 use ::{Reader, Result, Writer};
 
-use net2::UdpSocketExt;
 use std::net::{Ipv4Addr, SocketAddrV4, UdpSocket};
 
 /// is writer for multicast.
@@ -15,7 +14,7 @@ impl MulticastWriter {
     /// returns a new instance of `MulticastWriter`.
     /// `addr` is the address the sending socket binds to, and also the address that it sends to.
     pub fn new(addr: SocketAddrV4) -> Result<MulticastWriter> {
-        let socket = try!(UdpSocket::bind(&addr));
+        let socket = UdpSocket::bind(&addr)?;
         Ok(MulticastWriter {
             socket: socket,
             multicast_addr: addr,
@@ -25,7 +24,7 @@ impl MulticastWriter {
 
 impl Writer for MulticastWriter {
     fn write(&mut self, buf: &[u8]) -> Result<()> {
-        try!(self.socket.send_to(buf, &self.multicast_addr));
+        self.socket.send_to(buf, &self.multicast_addr)?;
         Ok(())
     }
 }
@@ -42,8 +41,8 @@ impl MulticastReader {
     /// returns a new instance of `MulticastReader`.
     /// Binds to `addr`.
     pub fn new(addr: SocketAddrV4) -> Result<MulticastReader> {
-        let socket = try!(UdpSocket::bind(&addr));
-        try!(socket.join_multicast_v4(&addr.ip(), &Ipv4Addr::new(0u8, 0u8, 0u8, 0u8)));
+        let socket = UdpSocket::bind(&addr)?;
+        socket.join_multicast_v4(&addr.ip(), &Ipv4Addr::new(0u8, 0u8, 0u8, 0u8))?;
         Ok(MulticastReader {
             socket: socket,
             buf: vec![0u8; 1536usize],
@@ -53,7 +52,7 @@ impl MulticastReader {
 
 impl Reader for MulticastReader {
     fn read(&mut self) -> Result<Option<Vec<u8>>> {
-        let (length, _) = try!(self.socket.recv_from(&mut self.buf));
+        let (length, _) = self.socket.recv_from(&mut self.buf)?;
         let (data, _) = self.buf.split_at(length);
         Ok(Some(Vec::from(data)))
     }

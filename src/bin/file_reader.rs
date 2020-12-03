@@ -1,5 +1,4 @@
 extern crate diffusion;
-use std::ascii::AsciiExt;
 use diffusion::Reader;
 use diffusion::FileReader;
 fn main() {
@@ -8,7 +7,7 @@ fn main() {
         println!("Usage: {} dfsn_filename", args[0]);
         return;
     }
-    let input: Option<Box<std::io::Read>> = if args[1] == "-".to_string() {
+    let input: Option<Box<dyn std::io::Read>> = if args[1] == "-" {
         Some(Box::new(std::io::stdin()))
     } else {
         Some(Box::new(std::fs::File::open(&std::path::Path::new(&args[1])).unwrap()))

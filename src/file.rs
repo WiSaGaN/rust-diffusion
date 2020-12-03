@@ -22,11 +22,11 @@ impl<T> FileReader<T> where T: Read {
     /// It returns error if the file is found corrupted.
     pub fn new(mut file: T) -> Result<FileReader<T>> {
         let mut header = vec![0u8; FILE_HEADER.len()];
-        let read_length = try!(file.read(&mut header));
+        let read_length = file.read(&mut header)?;
         if read_length == FILE_HEADER.len() && &*header.into_boxed_slice() == FILE_HEADER {
-            return Ok(FileReader { file: file });
+            Ok(FileReader { file: file })
         } else {
-            return Err(Error::CorruptSegmentHeader);
+            Err(Error::CorruptSegmentHeader)
         }
     }
 }
@@ -36,7 +36,7 @@ enum ReadExactError {
     Other(io::Error),
 }
 
-fn read_exact(read: &mut Read, mut buf: &mut [u8]) -> result::Result<(), ReadExactError> {
+fn read_exact(read: &mut dyn Read, mut buf: &mut [u8]) -> result::Result<(), ReadExactError> {
     let mut bytes_read = 0;
     while !buf.is_empty() {
         match read.read(buf) {
@@ -80,13 +80,13 @@ impl<T> Reader for FileReader<T> where T: Read {
         }
         match read_exact(&mut self.file, &mut full_buffer) {
             Ok(()) => {
-                return Ok(Some(full_buffer));
+                Ok(Some(full_buffer))
             }
             Err(ReadExactError::Partial(bytes_read)) => {
-                return Err(Error::InsufficientLength(body_length - bytes_read));
+                Err(Error::InsufficientLength(body_length - bytes_read))
             }
             Err(ReadExactError::Other(io_error)) => {
-                return Err(io_error.into());
+                Err(io_error.into())
             }
         }
     }
@@ -116,7 +116,7 @@ impl<T> FileWriter<T> where T: Write {
     /// returns a new file writer instance.
     /// It returns error if there is IO error during the process.
     pub fn new(mut file: T) -> Result<FileWriter<T>> {
-        if try!(file.write(FILE_HEADER)) == FILE_HEADER.len() {
+        if file.write(FILE_HEADER)? == FILE_HEADER.len() {
             Ok(FileWriter { file: file })
         } else {
             Err(Error::CorruptSegmentHeader)
@@ -130,9 +130,9 @@ impl<T> FileWriter<T> where T: Write {
         let header_ptr: *const u8 = unsafe { transmute(&value) };
         let header_length = size_of::<i32>();
         let slice = unsafe { ::std::slice::from_raw_parts(header_ptr, header_length) };
-        try!(self.file.write_all(slice));
+        self.file.write_all(slice)?;
         for buf in bufs {
-            try!(self.file.write_all(buf));
+            self.file.write_all(buf)?;
         }
         Ok(())
     }
