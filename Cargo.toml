@@ -12,7 +12,6 @@ This is the rust implementation of diffusion library. Diffusion is an effcient m
 """
 
 [dependencies]
-net2 = "0.2"
 
 [[bin]]
 name = "file_reader"
