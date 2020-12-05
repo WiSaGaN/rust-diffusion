@@ -13,11 +13,11 @@ pub struct MulticastWriter {
 impl MulticastWriter {
     /// returns a new instance of `MulticastWriter`.
     /// `addr` is the address the sending socket binds to, and also the address that it sends to.
-    pub fn new(addr: SocketAddrV4) -> Result<MulticastWriter> {
-        let socket = UdpSocket::bind(&addr)?;
+    pub fn new(multicast_addr: SocketAddrV4) -> Result<MulticastWriter> {
+        let socket = UdpSocket::bind(&multicast_addr)?;
         Ok(MulticastWriter {
-            socket: socket,
-            multicast_addr: addr,
+            socket,
+            multicast_addr,
         })
     }
 }
@@ -43,9 +43,10 @@ impl MulticastReader {
     pub fn new(addr: SocketAddrV4) -> Result<MulticastReader> {
         let socket = UdpSocket::bind(&addr)?;
         socket.join_multicast_v4(&addr.ip(), &Ipv4Addr::new(0u8, 0u8, 0u8, 0u8))?;
+        let buf = vec![0u8; 1536usize];
         Ok(MulticastReader {
-            socket: socket,
-            buf: vec![0u8; 1536usize],
+            socket,
+            buf,
         })
     }
 }
