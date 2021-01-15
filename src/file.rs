@@ -3,7 +3,6 @@ use crate::{Error, Reader, Result, Writer};
 use std::io;
 use std::result;
 use std::io::{Read, Write};
-use std::mem::{size_of, transmute};
 
 const FILE_HEADER: &[u8] = b"DFSN";
 
@@ -71,13 +70,9 @@ impl<T> Reader for FileReader<T> where T: Read {
                 return Err(io_error.into());
             }
         }
-        let header_ptr: *const i32 = unsafe { transmute(&header[0]) };
-        let body_length_number = unsafe { ::std::ptr::read::<i32>(header_ptr) };
+        let body_length_number = i32::from_le_bytes(header);
         let body_length = body_length_number as usize;
-        let mut full_buffer = Vec::with_capacity(body_length);
-        unsafe {
-            full_buffer.set_len(body_length);
-        }
+        let mut full_buffer = vec![0u8; body_length];
         match read_exact(&mut self.file, &mut full_buffer) {
             Ok(()) => {
                 Ok(Some(full_buffer))
@@ -126,11 +121,9 @@ impl<T> FileWriter<T> where T: Write {
     /// writes multiple buffers as one message
     /// returns `Ok(())` if write is successful.
     pub fn write_multiple(&mut self, bufs: &[&[u8]]) -> Result<()> {
-        let value = bufs.iter().fold(0, |sum, buf| sum + buf.len()) as i32;
-        let header_ptr: *const u8 = unsafe { transmute(&value) };
-        let header_length = size_of::<i32>();
-        let slice = unsafe { ::std::slice::from_raw_parts(header_ptr, header_length) };
-        self.file.write_all(slice)?;
+        let total_length_i32 = bufs.iter().fold(0, |sum, buf| sum + buf.len()) as i32;
+        let header: [u8; 4] = total_length_i32.to_le_bytes();
+        self.file.write_all(&header)?;
         for buf in bufs {
             self.file.write_all(buf)?;
         }
