@@ -1,8 +1,8 @@
 [package]
 name = "diffusion"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Wangshan Lu <wisagan@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT/Apache-2.0"
 readme = "README.md"
 documentation = "http://wisagan.github.io/rust-diffusion/diffusion/"
