@@ -42,7 +42,7 @@ impl MulticastReader {
     /// Binds to `addr`.
     pub fn new(addr: SocketAddrV4) -> Result<MulticastReader> {
         let socket = UdpSocket::bind(&addr)?;
-        socket.join_multicast_v4(&addr.ip(), &Ipv4Addr::new(0u8, 0u8, 0u8, 0u8))?;
+        socket.join_multicast_v4(addr.ip(), &Ipv4Addr::new(0u8, 0u8, 0u8, 0u8))?;
         let buf = vec![0u8; 1536usize];
         Ok(MulticastReader {
             socket,
