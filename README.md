@@ -12,4 +12,4 @@ This is the rust implementation of diffusion library. Diffusion is an effcient m
 
 ## Notes
 
-This library requires stable Rust 1.36.0.
+This library requires stable Rust 1.56.0.
